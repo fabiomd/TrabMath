@@ -40,7 +40,7 @@ exports.addMatter = function(req, res, next) {
             workload  : parseInt(req.body.workload),
             teacher : req.body.teacher
           });
-          
+
           newMatter._req_user = req.user;
           newMatter.save(function (err) {
             if (err) 
@@ -83,5 +83,29 @@ exports.getMatterById = function(req, res) {
     });
   }else{
     return errorMap.getError(res,303,{invalid: ['ID']});
-  } 
+  }
+} 
+
+
+exports.updateMatter = function(req,res){
+  if(!mongoose.Types.ObjectId.isValid(req.body.id))
+    return errorMap.getError(res,303,{invalid: ['ID']});
+  if(req.body.teacher && !mongoose.Types.ObjectId.isValid(req.body.teacher))
+    return errorMap.getError(res,303,{invalid: ['ID']});  
+
+  Matters.model.findById(req.body.id).exec(function(err,matter){
+    if(err)
+      return errorMap.getError(res,301,{err: err, model : 'Matters'});
+    if(!matter)
+      return errorMap.getError(res,300,{model: 'Matters'});
+    matter.name = req.body.name ? req.body.name : matter.name;
+    matter.description = req.body.description ? req.body.description : matter.description;
+    matter.workload = req.body.workload ? req.body.workload : matter.workload;
+    matter.teacher = req.body.teacher ? req.body.teacher : matter.teacher;
+    matter.save(function(err2){
+      if(err2)
+        return errorMap.getError(res,301,{err: err2, model : 'Matters'});
+      return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+    });
+  });
 }

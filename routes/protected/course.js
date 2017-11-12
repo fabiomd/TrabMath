@@ -83,3 +83,23 @@ exports.getCourseById = function(req, res) {
     return errorMap.getError(res,303,{invalid: ['ID']});
   } 
 }
+
+exports.updateCourse = function(req,res){
+  if(!mongoose.Types.ObjectId.isValid(req.body.id))
+    return errorMap.getError(res,303,{invalid: ['ID']}); 
+
+  Courses.model.findById(req.body.id).exec(function(err,course){
+    if(err)
+      return errorMap.getError(res,301,{err: err, model : 'Courses'});
+    if(!course)
+      return errorMap.getError(res,300,{model: 'Courses'});
+    course.name = req.body.name ? req.body.name : course.name;
+    course.description = req.body.description ? req.body.description : course.description;
+    course.duration = req.body.duration ? req.body.duration : course.duration;
+    course.save(function(err2){
+      if(err2)
+        return errorMap.getError(res,301,{err: err2, model : 'Courses'});
+      return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+    });
+  });
+}

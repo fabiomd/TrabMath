@@ -8,7 +8,7 @@ var Types = keystone.Field.Types;
 var User = new keystone.List('User');
 
 User.add({
-	name: { type: String, initial:true, require:true, unique:true, label:'Nome'},
+	name: { type: String, initial:true, require:true, label:'Nome'},
     cpf: {type: Number,initial :true, require:true, unique:true, label:'CPF'},
     formation: { type: String, initial:true,  require:true, label:'Formação'},
     email: { type: Types.Email, initial: true, required: true, unique: true, index: true },

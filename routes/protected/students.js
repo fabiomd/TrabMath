@@ -104,3 +104,73 @@ exports.getStudentById = function(req, res) {
     return errorMap.getError(res,303,{invalid: ['ID']});
   } 
 }
+
+exports.addMatter = function(req,res){
+  if(!req.body.studentid){
+    return errorMap.getError(res,305,{require : ['studentid']});
+  }
+
+  if(!req.body.matterid){
+    return errorMap.getError(res,305,{require : ['matterid']});
+  }
+
+  if(!mongoose.Types.ObjectId.isValid(req.body.matterid) || !mongoose.Types.ObjectId.isValid(req.body.studentid))
+    return errorMap.getError(res,303,{invalid: ['ID']});
+
+  Students.model.findById(req.body.studentid).exec(function(err,student){
+    if(err)
+      return errorMap.getError(res,301,{err: err, model : 'Students'});
+    if(!student)
+      return errorMap.getError(res,300,{model: 'Students'});
+
+    Matters.model.findById(req.body.matterid).exec(function(err2,matter){
+      if(err2)
+        return errorMap.getError(res,301,{err: err2, model : 'Students'});
+      if(matter && student.matters.indexOf(req.body.matterid) == -1){
+        student.matters.push(req.body.matterid);
+        student.save(function(err3){
+          if(err3)
+            return errorMap.getError(res,301,{err: err3, model : 'Students'});
+          return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+        });
+      }else{
+        return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+      }
+    });
+  });
+}
+
+exports.rmMatter = function(req,res){
+  if(!req.body.studentid){
+    return errorMap.getError(res,305,{require : ['studentid']});
+  }
+
+  if(!req.body.matterid){
+    return errorMap.getError(res,305,{require : ['matterid']});
+  }
+
+  if(!mongoose.Types.ObjectId.isValid(req.body.matterid) || !mongoose.Types.ObjectId.isValid(req.body.studentid))
+    return errorMap.getError(res,303,{invalid: ['ID']});
+
+  Students.model.findById(req.body.studentid).exec(function(err,student){
+    if(err)
+      return errorMap.getError(res,301,{err: err, model : 'Students'});
+    if(!student)
+      return errorMap.getError(res,300,{model: 'Students'});
+
+    Matters.model.findById(req.body.matterid).exec(function(err2,matter){
+      if(err2)
+        return errorMap.getError(res,301,{err: err2, model : 'Students'});
+      if(matter && student.matters.indexOf(req.body.matterid) != -1){
+        student.matters.splice(student.matters.indexOf(req.body.matterid), 1);
+        student.save(function(err3){
+          if(err3)
+            return errorMap.getError(res,301,{err: err3, model : 'Students'});
+          return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+        });
+      }else{
+        return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+      }
+    });
+  });
+}

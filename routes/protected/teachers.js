@@ -75,3 +75,20 @@ exports.getTeacherById = function(req, res) {
     return errorMap.getError(res,303,{invalid: ['ID']});
   } 
 }
+
+exports.updateTeacher = function(req,res){
+  Teachers.model.findById(req.user.id).exec(function(err,teacher){
+    if(err)
+      return errorMap.getError(res,301,{err: err, model : 'Teachers'});
+    if(!teacher)
+      return errorMap.getError(res,300,{model: 'Teachers'});
+    teacher.name = req.body.name ? req.body.name : teacher.name;
+    teacher.formation = req.body.formation ? req.body.formation : teacher.formation;
+    teacher.password = req.body.password ? req.body.password : teacher.password;
+    teacher.save(function(err2){
+      if(err2)
+        return errorMap.getError(res,301,{err: err2, model : 'Teachers'});
+      return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
+    });
+  });
+}
