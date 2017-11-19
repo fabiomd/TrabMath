@@ -41,7 +41,10 @@ exports = module.exports = function (app) {
 	app.get('/matter/:id', routes.auth.checkConnection.requireUser, routes.protected.matters.getMatterById);
 	app.post('/addmatter', routes.auth.checkConnection.requireUser, routes.protected.matters.addMatter);
     app.post('/updatematter',routes.auth.checkConnection.requireUser, routes.protected.matters.updateMatter);
- 
+    app.get('/mattersbyteacher/:id',routes.auth.checkConnection.requireUser, routes.protected.matters.getMatterByTeacherId);
+    app.get('/mattersbysignedteacher',routes.auth.checkConnection.requireUser, routes.protected.matters.getMatterBySignedTeacher);
+    app.get('/mattersbysignedteacherandshift/:shift',routes.auth.checkConnection.requireUser, routes.protected.matters.getMatterBySignedTeacherAndShift);
+
 	app.post('/addpresencecontrol', routes.auth.checkConnection.requireUser, routes.protected.presenceControl.addPresence);
 	app.get('/presencecontrol',routes.auth.checkConnection.requireUser, routes.protected.presenceControl.getPresence);
 

@@ -14,6 +14,7 @@ var Matters = new keystone.List('Matters',{
 Matters.add({
     name: { type: String, initial:true,  require:true, unique:true, label:'Nome'},
 	description: { type: String, initial:true,  label:'Descrição'},
+    shift: { type: types.Select, options: 'morning, afternoon, night', default: 'morning'},
     workload: {type: Number,initial :true, require:true, label:'Carga horária'},
     teacher:  {type: types.Relationship, ref: 'User', many:false, initial:true, label:'Professor'},
 });
@@ -28,6 +29,7 @@ Matters.schema.set('toJSON', {
          delete ret.description;
          delete ret.workload;
          delete ret.teacher;
+         delete ret.shift;
          delete ret.updatedBy;
          delete ret.updatedAt;
          delete ret.createdBy;

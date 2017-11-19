@@ -23,6 +23,19 @@ exports.addMatter = function(req, res, next) {
     return errorMap.getError(res,305,{require : ['teacher']});
   }
 
+  if(!req.body.shift){
+    return errorMap.getError(res,305,{require : ['shift']});
+  }
+
+  var validShift = ['morning','afternoon','night'];
+  var i=0;
+  for(i=0;i<validShift.length;i++){
+    if(validShift[i] == req.body.shift)
+      break;
+  }
+  if(i < validShift.length)
+    return errorMap.getError(res,303,{invalid: ['shift']});
+
   Matters.model.findOne({name : req.body.name}).exec(function(err,matter){
     if(err)
       return errorMap.getError(res,301,{err: err, model : 'Matter'});
@@ -37,6 +50,7 @@ exports.addMatter = function(req, res, next) {
           var newMatter = new Matters.model({
             name : req.body.name,
             description: req.body.description,
+            shift : req.body.shift,
             workload  : parseInt(req.body.workload),
             teacher : req.body.teacher
           });
@@ -48,7 +62,7 @@ exports.addMatter = function(req, res, next) {
             return successMap.getSuccess(res,314,{model : 'User', modelID : req.user.id});
           });
         }else{
-          return errorMap.getError(res,300,{model: 'Matter'});
+          return errorMap.getError(res,300,{model: 'Teacher'});
         }
       });
     }else{
@@ -76,6 +90,7 @@ exports.getMatterById = function(req, res) {
       var tempMatter = {
         name : item.name,
         description : item.description,
+        shift : item.shift,
         workload : item.workload,
         teacher : item.teacher
       }
@@ -84,8 +99,58 @@ exports.getMatterById = function(req, res) {
   }else{
     return errorMap.getError(res,303,{invalid: ['ID']});
   }
-} 
+}
 
+exports.getMatterByTeacherId = function(req, res) { 
+  if(mongoose.Types.ObjectId.isValid(req.params.id)){ 
+    Matters.model.find({'teacher':req.params.id}).exec(function(err, items) { 
+      if (err) 
+        return errorMap.getError(res,301,{err: err, model : 'Matters'});
+      return successMap.getSuccess(res,310,{model : 'Matters', items: items});    
+    });
+  }else{
+    return errorMap.getError(res,303,{invalid: ['ID']});
+  }
+}  
+
+exports.getMatterBySignedTeacher = function(req, res) { 
+  if(mongoose.Types.ObjectId.isValid(req.user.id)){ 
+    Matters.model.find({'teacher':req.user.id}).exec(function(err, items) { 
+      if (err) 
+        return errorMap.getError(res,301,{err: err, model : 'Matters'});
+      return successMap.getSuccess(res,310,{model : 'Matters', items: items});    
+    });
+  }else{
+    return errorMap.getError(res,303,{invalid: ['ID']});
+  }
+}
+
+exports.getMatterBySignedTeacherAndShift = function(req, res) { 
+  if(mongoose.Types.ObjectId.isValid(req.user.id)){
+    if(!req.params.shift)
+      return errorMap.getError(res,305,{require : ['shift']});
+    var validShift = ['morning','afternoon','night'];
+    var i=0;
+    for(i=0;i<validShift.length;i++){
+      if(validShift[i] == req.params.shift)
+        break;
+    }
+    if(i == validShift.length)
+      return errorMap.getError(res,303,{invalid: ['shift']}); 
+    Matters.model.find({'teacher':req.user.id}).exec(function(err, items) { 
+      if (err) 
+        return errorMap.getError(res,301,{err: err, model : 'Matters'});
+      var temp = [];
+      items.forEach(function(item,index){
+        if(item.shift == req.params.shift)
+          temp.push(item);
+      })
+      return successMap.getSuccess(res,310,{model : 'Matters', items: temp});    
+    });
+  }else{
+    return errorMap.getError(res,303,{invalid: ['ID']});
+  }
+}
 
 exports.updateMatter = function(req,res){
   if(!mongoose.Types.ObjectId.isValid(req.body.id))
